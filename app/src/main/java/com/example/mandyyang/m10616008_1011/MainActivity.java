@@ -10,7 +10,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 //OpenCV
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -18,6 +21,8 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -57,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private BaseLoaderCallback getmLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
+
             super.onManagerConnected(status);
         }
     };
@@ -119,7 +125,7 @@ public void b2_Click(View view){
     }
 
 
-    ////b4_Click
+    //b4_Click
 
     public void b4_Click(View view){
         iv2 = (ImageView) findViewById(R.id.inputImg1);
@@ -143,6 +149,34 @@ public void b2_Click(View view){
 
     }
 
+    //b5_Click_1025
+
+    public void b5_Click(View view){
+        iv1 = (ImageView) findViewById(R.id.inputImg2);
+        BitmapDrawable abmp = (BitmapDrawable) iv1.getDrawable();
+        bmp1=abmp.getBitmap();
+
+        iv3 = (ImageView) findViewById(R.id.outputImg1);
+        Button b2 =(Button) findViewById(R.id.button8);
+        Bitmap thrBmp = Otsu(bmp1);
+
+        iv3.setImageBitmap(thrBmp);
+        iv3.invalidate();
+
+    }
+
+    public void b6_Click(View view) {
+
+        iv1 = (ImageView) findViewById(R.id.inputImg3);
+        BitmapDrawable abmp = (BitmapDrawable) iv1.getDrawable();
+        bmp1=abmp.getBitmap();
+
+        iv3 = (ImageView) findViewById(R.id.outputImg1);
+        Bitmap thrBmp = Otsu(bmp1);
+
+        iv3.setImageBitmap(thrBmp);
+        iv3.invalidate();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,6 +194,8 @@ public void b2_Click(View view){
         outputImg = (ImageView) findViewById(R.id.outputImg);
 
     }
+
+
 
     public void RGB2Gray(View view) {
         operation = Bitmap.createBitmap(inputBmp.getWidth(), inputBmp.getHeight(), inputBmp.getConfig());
@@ -345,7 +381,6 @@ public void b2_Click(View view){
 
 
     //---Histogram_btn3
-
     private void Histogram(Bitmap bmp, ImageView iv) {
         Bitmap bmp3 = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
         int imgH = bmp3.getHeight();
@@ -424,5 +459,43 @@ public void b2_Click(View view){
         iv.setImageBitmap(bitMap);
 
     }
+
+    private Bitmap Otsu(Bitmap bmpid) {
+
+        bmp2 = Bitmap.createBitmap(bmpid.getWidth(), bmpid.getHeight(), bmpid.getConfig());
+        int imgH = bmp2.getHeight();
+        int imgW = bmp2.getWidth();
+        Mat rgba = new Mat(imgH, imgW, CvType.CV_8SC1);
+        Mat gray = new Mat(imgH, imgW, CvType.CV_8SC1);
+        Mat bin = new Mat(imgH, imgW, CvType.CV_8SC1);
+        Utils.bitmapToMat(bmpid, rgba);
+        Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGB2GRAY);
+        Imgproc.GaussianBlur(gray, gray, new Size(3, 3), 0);
+        Imgproc.threshold(gray, bin, 0, 255, Imgproc.THRESH_OTSU);
+
+       // List<MatOfPoint> contours = new ArrayList<>();
+       // Mat hierarchy = new Mat();
+      // Imgproc.findContours(bin, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+//        for (int idx = 0; idx >= 0; idx = (int) hierarchy.get(0, idx)[0]) {
+   //         MatOfPoint matOfPoint = contours.get(idx);
+     //       Rect rect = Imgproc.boundingRect(matOfPoint);
+       //     Imgproc.rectangle(rgba, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+
+        //}
+
+        try {
+
+            bmp2 =Bitmap.createBitmap(rgba.cols(),rgba.rows(),Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(bin,bmp2);
+
+        }catch(Exception ex){
+
+            System.out.print(ex.getMessage());
+    }
+        return bmp2;
+
+    }
+
 
 }
